@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stock Checking</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f9f9f9;
+    }
+    h1 {
+      text-align: center;
+    }
+    form {
+      background: #fff;
+      padding: 20px;
+      margin: 0 auto 20px auto;
+      max-width: 400px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+    button {
+      padding: 10px 15px;
+      background: #28a745;
+      border: none;
+      color: #fff;
+      border-radius: 3px;
+      cursor: pointer;
+      margin-right: 5px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 800px;
+      margin: 20px auto;
+      background: #fff;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: left;
+    }
+    th {
+      background: #f2f2f2;
+    }
+    .edit-btn {
+      background-color: #ffc107;
+      color: #fff;
+    }
+    .delete-btn {
+      background-color: #dc3545;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <h1>User Registration</h1>
+  <form id="registrationForm">
+    <label>Name:</label>
+    <input type="text" id="userName" required>
+    
+    <label>Mobile Number:</label>
+    <input type="text" id="userMobile" required>
+    
+    <button type="button" onclick="registerUser()">Register</button>
+  </form>
+
+  <h1>Stock Checking</h1>
+  <form id="inventoryForm">
+    <label>Item Name:</label>
+    <input type="text" id="itemName" required>
+    
+    <label>Part Number:</label>
+    <input type="text" id="partNumber" required>
+    
+    <label>Brand:</label>
+    <input type="text" id="brand" required>
+    
+    <label>Stock Qty:</label>
+    <input type="number" id="stockQty" required>
+    
+    <label>Min Qty:</label>
+    <input type="number" id="minQty" required>
+    
+    <label>Reorder Qty:</label>
+    <input type="number" id="reorderQty" required>
+    
+    <button type="submit">Save Item</button>
+    <button type="button" id="exportBtn">Export as Excel</button>
+  </form>
+  
+  <table id="inventoryTable">
+    <thead>
+      <tr>
+        <th>Item Name</th>
+        <th>Part Number</th>
+        <th>Brand</th>
+        <th>Stock Qty</th>
+        <th>Min Qty</th>
+        <th>Reorder Qty</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  
+  <script>
+    let editingRow = null;
+
+    function registerUser() {
+      const name = document.getElementById('userName').value;
+      const mobile = document.getElementById('userMobile').value;
+      if (name && mobile) {
+        alert(`User Registered: ${name}, Mobile: ${mobile}`);
+        document.getElementById('registrationForm').reset();
+      } else {
+        alert('Please enter all details');
+      }
+    }
+
+    document.getElementById('inventoryForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      const itemName = document.getElementById('itemName').value;
+      const partNumber = document.getElementById('partNumber').value;
+      const brand = document.getElementById('brand').value;
+      const stockQty = document.getElementById('stockQty').value;
+      const minQty = document.getElementById('minQty').value;
+      const reorderQty = document.getElementById('reorderQty').value;
+      const table = document.getElementById('inventoryTable').getElementsByTagName('tbody')[0];
+      
+      if (editingRow) {
+        editingRow.innerHTML = `<td>${itemName}</td><td>${partNumber}</td><td>${brand}</td><td>${stockQty}</td><td>${minQty}</td><td>${reorderQty}</td>
+        <td><button class='edit-btn' onclick='editItem(this)'>Edit</button> <button class='delete-btn' onclick='deleteItem(this)'>Delete</button></td>`;
+        editingRow = null;
+      } else {
+        const newRow = table.insertRow();
+        newRow.innerHTML = `<td>${itemName}</td><td>${partNumber}</td><td>${brand}</td><td>${stockQty}</td><td>${minQty}</td><td>${reorderQty}</td>
+        <td><button class='edit-btn' onclick='editItem(this)'>Edit</button> <button class='delete-btn' onclick='deleteItem(this)'>Delete</button></td>`;
+      }
+      document.getElementById('inventoryForm').reset();
+    });
+    
+    function editItem(button) {
+      editingRow = button.parentElement.parentElement;
+      const cells = editingRow.getElementsByTagName('td');
+      document.getElementById('itemName').value = cells[0].innerText;
+      document.getElementById('partNumber').value = cells[1].innerText;
+      document.getElementById('brand').value = cells[2].innerText;
+      document.getElementById('stockQty').value = cells[3].innerText;
+      document.getElementById('minQty').value = cells[4].innerText;
+      document.getElementById('reorderQty').value = cells[5].innerText;
+    }
+    
+    function deleteItem(button) {
+      button.parentElement.parentElement.remove();
+    }
+    
+    document.getElementById('exportBtn').addEventListener('click', function() {
+      let table = document.getElementById('inventoryTable');
+      let rows = Array.from(table.rows);
+      let csvContent = "data:text/csv;charset=utf-8," + rows.map(row => Array.from(row.cells).map(cell => cell.innerText).join(",")).join("
+");
+      let encodedUri = encodeURI(csvContent);
+      let link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "inventory_data.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+  </script>
+</body>
+</html>
